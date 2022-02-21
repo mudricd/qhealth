@@ -1,0 +1,95 @@
+---
+
+# CREATE GROUP
+- name: Create group with delete protection enabled and custom attributes
+  win_domain_group:
+    name: "{{ group_name }}"
+    scope: "{{ scope }}"
+    category: "{{ category }}"
+    attributes:
+      mail: "{{ mail }}"
+      description: "{{ description }}"
+    ignore_protection: yes
+  tags:
+    - create_group
+
+# DELETE GROUP
+- name: Delete group ignoring the protection flag
+  win_domain_group:
+    name: "{{ group_name }}"
+    state: absent
+    ignore_protection: yes
+  tags:
+    - delete_group
+
+# UPDATE GROUP
+
+- name: Update {{ srg_group }} group description
+  ansible.windows.win_powershell:
+    script: |
+      Set-ADGroup -Identity {{ srg_group }} -Description {{ srg_description }} -Passthru
+  when: srg_description | length > 0
+  tags:
+    - update_group
+
+- name: Update {{ srg_group }} group email
+  ansible.windows.win_powershell:
+    script: |
+      Set-ADGroup -Identity {{ srg_group }} -Replace @{mail = '{{ srg_mail }}'}
+  when: srg_mail | length > 0
+  tags:
+    - update_group
+
+- name: Update {{ srg_group }} group category
+  ansible.windows.win_powershell:
+    script: |
+      Set-ADGroup -Identity {{ srg_group }} -GroupCategory {{ srg_group_category }} -Passthru
+  when: srg_group_category is defined
+  tags:
+    - update_group
+
+- name: Update {{ srg_group }} group scope
+  ansible.windows.win_powershell:
+    script: |
+      Set-ADGroup -Identity {{ srg_group }} -GroupScope {{ srg_group_scope }} -Passthru
+  when: srg_group_scope is defined
+  tags:
+    - update_group
+
+# - name: Update group description
+#   win_domain_group:
+#     name: "{{ group_name }}"
+#     attributes:
+#       description: "{{ description }}"
+#     ignore_protection: yes
+#   ignore_errors: true
+#   tags:
+#     - update_group
+
+# - name: Update group scope
+#   win_domain_group:
+#     name: "{{ group_name }}"
+#     scope: "{{ scope }}"
+#     ignore_protection: yes
+#   ignore_errors: true
+#   tags:
+#     - update_group
+
+# - name: Update group category
+#   win_domain_group:
+#     name: "{{ group_name }}"
+#     category: "{{ category }}"
+#     ignore_protection: yes
+#   ignore_errors: true
+#   tags:
+#     - update_group
+
+# - name: Update group mail
+#   win_domain_group:
+#     name: "{{ group_name }}"
+#     attributes:
+#       mail: "{{ mail }}"
+#     ignore_protection: yes
+#   ignore_errors: true
+#   tags:
+#     - update_group
